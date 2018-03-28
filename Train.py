@@ -71,6 +71,10 @@ class Model:
         :file_name: имя файла
         :return: nothing
         """
+        
+        # используй pickle
+        
+        
         buffer = dict()
         for key in self.data.keys():
             buffer[" ".join(list(key))] = self.data[key]
