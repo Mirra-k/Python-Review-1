@@ -14,7 +14,7 @@ class Model:
         :__wnc: ключ в словаре для каждого индекса. 
             Его значение - Сумма количеств свсех слов для данного ключа.
         """
-        self.n = n + 1
+        self.n = n + 1  # тут лучше объяснить почему + 1
         self.data = {}
         self.__wnc = '_total_word_num'
     
@@ -35,26 +35,33 @@ class Model:
         with open(file_name) as file:
             for line in file:
                 for word in re.split('[^a-zA-Zа-яА-Я]+', line):
-                    if len(cur_ngram) < self.n:
-                        if lc:
+                    if len(cur_ngram) < self.n:  # вот отсюда и ниже избыточный и не очень понятный код
+                        # давай избавимся от повторяющихся строк кода, от лишних if/else конструкций 
+                        # и сделаем это все чуть читабельнее
+                        if lc:  # вот эта штука повторяется, да и написана не самым красивым образом 
                             cur_ngram.append(word.lower())
                         else:
                             cur_ngram.append(word)
-                        continue
+                        continue  # вот это мне совсем не нравится
                     else:
-                        cur_ngram = cur_ngram[1:]
+                        cur_ngram = cur_ngram[1:]  # а куда тут девается самое первое слово из строки? зачем его выкидывать?
                         if lc:
                             cur_ngram.append(word.lower())
                         else:
                             cur_ngram.append(word)
-                    for i in range(self.n - 1):
-                        key = tuple(cur_ngram[i:-1])
+                    for i in range(self.n - 1):  
+                        key = tuple(cur_ngram[i:-1])  
                         value = cur_ngram[-1]
-                        if key not in self.data.keys():
-                            self.data[key] = dict()
+                        if key not in self.data.keys():  # тут во-первых можно (и нужно) не вызывать keys(), а просто 
+                            # if key not in self.data, потому что в твоем случае он перебирает весь массив ключей за O(n)
+                            # а в моем ищет по хэшу за O(1)
+                            # а во-вторых, используя defaultdict можно убрать эти строчки отсюда
+                            self.data[key] = dict() 
                             self.data[key][self.__wnc] = 0
-                        if value not in self.data[key]:
+                        if value not in self.data[key]: 
                             self.data[key][value] = 0
+                        # и до сюда
+                        # используй это
                         self.data[key][value] += 1
                         self.data[key][self.__wnc] += 1
                     
@@ -69,7 +76,12 @@ class Model:
             buffer[" ".join(list(key))] = self.data[key]
         open(file_name, 'w').write(json.dumps(buffer))
 
-n = 1
+        
+# весь код отсюда и ниже в функцию main, которая будет вызывать при условии 
+# if __name__ == "__main__":
+# погугли что это такое
+
+n = 1  # это в аргументы надо добавить
 m = Model(n)
 
 parser = argparse.ArgumentParser()
