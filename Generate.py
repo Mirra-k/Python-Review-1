@@ -17,6 +17,11 @@ class Model:
         self.__wnc = '_total_word_num'
         
     def load(self, file_name):
+        
+        
+        # используй pickle
+        
+        
         """
         Загружает массив словарей из текста в data.
         :file_name: имя файла, из которого мы берем информацию.
@@ -33,18 +38,20 @@ class Model:
         """
         Для каждого значения для n-граммы считает вероятность вхождения слова.
         (нормирует частоты)
-        :b: значение __wnc для каждой n-граммы.
+        :b: значение __wnc для каждой n-граммы.  # давай не будем использовать однобуквенные переменные
         :predata: массив, в котором хранятся слова и вероятность их вхождения для каждой n-граммы.
         :return: nothing
         """
         self.predata = {}
-        for ngr in self.data.keys():
+        for ngr in self.data.keys(): # for ngramm, ngramm_value in self.data.items():
             self.predata[ngr] = []
             self.predata[ngr].append(list(self.data[ngr].keys()))
             b = self.data[ngr][self.__wnc]
-            self.data[ngr][self.__wnc] = 0
-            self.predata[ngr].append(np.array(list(self.data[ngr].values())))
-            self.predata[ngr][1] = self.predata[ngr][1] / np.int(b)
+            self.data[ngr][self.__wnc] = 0  # зачем
+            self.predata[ngr].append(np.array(list(self.data[ngr].values())))  # в одном массиве лежат и вероятности и слова вперемешку?
+            self.predata[ngr][1] = self.predata[ngr][1] / np.int(b)  # почему [1]?!
+            
+            # вот этот кусочек (self._preprocess) надо прям переписать нормально
         
     
     def _get_random_after(self, ngr):
@@ -64,9 +71,12 @@ class Model:
         :cur_ngram: n-грамма, по которой ищем следующее слово.
         :return: последовательность заданной длины. 
         """
-        st = word
+        st = word  # названия переменных!
         cur_ngram = [word]
-        self.preprocess()
+        self.preprocess()  # мне кажется, что метод у тебя назывался немного по-другому
+        # значит код ты не запускала
+        # обидно
+        
         for i in range(1, text_len):
             word = self._get_random_after(cur_ngram)
             st += " " + word
@@ -83,8 +93,8 @@ m = Model(n)
     
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", help="path to the file from which the model is loaded")
-parser.add_argument("--seed", help="The initial word")
-parser.add_argument("--length", type=int, help="length of the generated sequence")
+parser.add_argument("--seed", help="The initial word")  # а если слово не дали, надо уметь выбирать случайное из модели
+parser.add_argument("--length", type=int, help="length of the generated sequence") # дефолтную проставь
 parser.add_argument("--output", help="The file to which the result will be written")
 
 args = parser.parse_args()
