@@ -35,7 +35,7 @@ class Model:
         """
         Для каждого значения для n-граммы считает вероятность вхождения слова.
         (нормирует частоты)
-        :summa: значение __wnc для каждой n-граммы.
+        :b: значение __wnc для каждой n-граммы.
         :predata: массив, в котором хранятся слова и вероятность их вхождения для каждой n-граммы.
                     в одной куче, потому что это удобно для np.random.choice
         :return: nothing
@@ -44,10 +44,10 @@ class Model:
         for ngramm, ngramm_value in self.data.items():
             self.predata[ngramm] = []
             self.predata[ngramm].append(list(ngramm_value.keys()))#добовляем список слов
-            summa = ngramm_value[self.__wnc]# запоминаем общую сумму для н-граммы
+            summa = np.int(ngramm_value[self.__wnc]) # запоминаем общую сумму для н-граммы
             ngramm_value[self.__wnc] = 0# обнуляем общую сумму, чтобы она не мешала рассчету вероятностей
             self.predata[ngramm].append(np.array(list(ngramm_value.values())))#добовляем список количества вхождений
-            self.predata[ngramm][1] = self.predata[ngramm][1] / np.int(summa) #в 1 лежали количества вхождений слова
+            self.predata[ngramm][1] = self.predata[ngramm][1] / summa #в 1 лежали количества вхождений слова
             # и мы их поделили на общую сумму вхождений слов. Получили список вероятностей
         
     
@@ -83,7 +83,7 @@ class Model:
         return string
     
     def getRandomWord(self):
-        return random.choice(data.values().keys)
+        return random.choice(data.values().keys())
 
     
 if __name__ == "__main__":
@@ -98,14 +98,16 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    m.load(args.output)
+    m.load(args.model)
 
     if args.seed:
-        word = getText(args.seed)
+        word = m.getText(args.seed, args.length)
     else:
-        word = m.getRandomWord
+        word = m.getText(m.getRandomWord, args.length)
 
     if args.output:
-        open(file_name, 'w').write(json.dumps(word, args.length)) 
+        with open(args.output, 'wb') as file:
+            pickle.dump(word, file)
+            open("123", 'w').write(word) 
     else:
         print(word, args.length)
