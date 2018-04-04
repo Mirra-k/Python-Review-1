@@ -35,7 +35,7 @@ class Model:
         """
         Для каждого значения для n-граммы считает вероятность вхождения слова.
         (нормирует частоты)
-        :b: значение __wnc для каждой n-граммы.
+        :summa: значение __wnc для каждой n-граммы.
         :predata: массив, в котором хранятся слова и вероятность их вхождения для каждой n-граммы.
                     в одной куче, потому что это удобно для np.random.choice
         :return: nothing
@@ -83,7 +83,7 @@ class Model:
         return string
     
     def getRandomWord(self):
-        return random.choice(data.values().keys())
+        return str(random.choice([x for k in d for x in self.predata[k]]))
 
     
 if __name__ == "__main__":
