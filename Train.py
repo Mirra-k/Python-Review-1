@@ -4,6 +4,7 @@ import argparse
 import sys
 import os
 import pickle
+from collections import defaultdict
 
 class Model:
     
@@ -82,7 +83,7 @@ if __name__ == "__main__":
     if args.input_dir:
         files = os.listdir(args.input_dir) 
         for i in files:
-            m.fit_by_file(namespace.input_dir + '/' + i, args.lc)
+            m.fit_by_file(args.input_dir + '/' + i, args.lc)
             m.to_file(args.model)
     else:
         file = open('file.stdin', 'w')
