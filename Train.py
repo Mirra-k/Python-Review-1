@@ -3,6 +3,7 @@ import json
 import argparse
 import sys
 import os
+import pickle
 
 class Model:
     
@@ -14,7 +15,7 @@ class Model:
         :__wnc: ключ в словаре для каждого индекса. 
             Его значение - Сумма количеств свсех слов для данного ключа.
         """
-        self.n = n + 1  # тут лучше объяснить почему + 1
+        self.n = n + 1 # для создания n-граммы мы берем строку из n+1 слова. n слов для ключа и 1 для значения
         self.data = {}
         self.__wnc = '_total_word_num'
     
@@ -35,75 +36,58 @@ class Model:
         with open(file_name) as file:
             for line in file:
                 for word in re.split('[^a-zA-Zа-яА-Я]+', line):
-                    if len(cur_ngram) < self.n:  # вот отсюда и ниже избыточный и не очень понятный код
-                        # давай избавимся от повторяющихся строк кода, от лишних if/else конструкций 
-                        # и сделаем это все чуть читабельнее
-                        if lc:  # вот эта штука повторяется, да и написана не самым красивым образом 
-                            cur_ngram.append(word.lower())
-                        else:
-                            cur_ngram.append(word)
-                        continue  # вот это мне совсем не нравится
+                    if lc:
+                        cur_ngram.append(word.lower())
                     else:
-                        cur_ngram = cur_ngram[1:]  # а куда тут девается самое первое слово из строки? зачем его выкидывать?
-                        if lc:
-                            cur_ngram.append(word.lower())
-                        else:
-                            cur_ngram.append(word)
-                    for i in range(self.n - 1):  
-                        key = tuple(cur_ngram[i:-1])  
-                        value = cur_ngram[-1]
-                        if key not in self.data.keys():  # тут во-первых можно (и нужно) не вызывать keys(), а просто 
-                            # if key not in self.data, потому что в твоем случае он перебирает весь массив ключей за O(n)
-                            # а в моем ищет по хэшу за O(1)
-                            # а во-вторых, используя defaultdict можно убрать эти строчки отсюда
-                            self.data[key] = dict() 
-                            self.data[key][self.__wnc] = 0
-                        if value not in self.data[key]: 
-                            self.data[key][value] = 0
-                        # и до сюда
-                        # используй это
-                        self.data[key][value] += 1
-                        self.data[key][self.__wnc] += 1
-                    
+                        cur_ngram.append(word)
+                        
+                    if len(cur_ngram) >= self.n: 
+                        cur_ngram = cur_ngram[1:] # в предыдущей итерации мы внесли n-грамму в словарь.
+                        #на этой мы создаем новую n-грамму из n-1 предыдущего слова и одного нового,
+                        #добавленного выше
+                        
+                        for i in range(self.n - 1):
+                            key = tuple(cur_ngram[i:-1])
+                            value = cur_ngram[-1]
+                            
+                            if key not in self.data:
+                                self.data[key] = defaultdict(int)
+                                self.data[key][self.__wnc] = 0
+                            self.data[key][value] += 1
+                            self.data[key][self.__wnc] += 1
+                            
     def to_file(self, file_name):
         """
         Записывает полученный словарь в файл
         :file_name: имя файла
         :return: nothing
         """
-        
-        # используй pickle
-        
-        
         buffer = dict()
         for key in self.data.keys():
             buffer[" ".join(list(key))] = self.data[key]
-        open(file_name, 'w').write(json.dumps(buffer))
+        with open(file_name, 'wb') as file:
+            pickle.dump(buffer, file)
 
-        
-# весь код отсюда и ниже в функцию main, которая будет вызывать при условии 
-# if __name__ == "__main__":
-# погугли что это такое
+if __name__ == "__main__":
+    n = 1
+    m = Model(n)
 
-n = 1  # это в аргументы надо добавить
-m = Model(n)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input-dir", help="path to the directory containing the document collection")
+    parser.add_argument("--model", help="the path to the file to which the model is saved")
+    parser.add_argument("--lc", action='store_true', help="Allow the texts to lowercase")
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--input-dir", help="path to the directory containing the document collection")
-parser.add_argument("--model", help="the path to the file to which the model is saved")
-parser.add_argument("--lc", action='store_true', help="Allow the texts to lowercase")
+    args = parser.parse_args()
 
-args = parser.parse_args()
-
-if args.input_dir:
-    files = os.listdir(args.input_dir) 
-    for i in files:
-        m.fit_by_file(namespace.input_dir + '/' + i, args.lc)
+    if args.input_dir:
+        files = os.listdir(args.input_dir) 
+        for i in files:
+            m.fit_by_file(namespace.input_dir + '/' + i, args.lc)
+            m.to_file(args.model)
+    else:
+        file = open('file.stdin', 'w')
+        for line in sys.stdin:
+            file.write(line + '/n')
+        file.close()
+        m.fit_by_file('file.stdin', args.lc)
         m.to_file(args.model)
-else:
-    file = open('file.stdin', 'w')
-    for line in sys.stdin:
-        file.write(line + '/n')
-    file.close()
-    m.fit_by_file('file.stdin', args.lc)
-    m.to_file(args.model)
