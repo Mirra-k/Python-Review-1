@@ -77,13 +77,15 @@ if __name__ == "__main__":
     parser.add_argument("--input-dir", help="path to the directory containing the document collection")
     parser.add_argument("--model", default="model.txt" help="the path to the file to which the model is saved")
     parser.add_argument("--lc", action='store_true', help="Allow the texts to lowercase")
+    
+    # а давай сделаем n параметром здесь и будем его брать отсюда
 
     args = parser.parse_args()
 
     if args.input_dir:
         files = os.listdir(args.input_dir) 
         for i in files:
-            m.fit_by_file(args.input_dir + '/' + i, args.lc)
+            m.fit_by_file(args.input_dir + '/' + i, args.lc)  # os.path.join, на винде это работать не будет
             m.to_file(args.model)
     else:
         file = open('file.stdin', 'w')
