@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", help="path to the directory containing the document collection")
-    parser.add_argument("--model", help="the path to the file to which the model is saved")
+    parser.add_argument("--model", default="model.txt" help="the path to the file to which the model is saved")
     parser.add_argument("--lc", action='store_true', help="Allow the texts to lowercase")
 
     args = parser.parse_args()
