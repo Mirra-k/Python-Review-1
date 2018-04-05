@@ -44,10 +44,10 @@ class Model:
         for ngramm, ngramm_value in self.data.items():
             self.predata[ngramm] = []
             self.predata[ngramm].append(list(ngramm_value.keys()))#добовляем список слов
-            summa = np.int(ngramm_value[self.__wnc]) # запоминаем общую сумму для н-граммы
+            summa = ngramm_value[self.__wnc]# запоминаем общую сумму для н-граммы
             ngramm_value[self.__wnc] = 0# обнуляем общую сумму, чтобы она не мешала рассчету вероятностей
             self.predata[ngramm].append(np.array(list(ngramm_value.values())))#добовляем список количества вхождений
-            self.predata[ngramm][1] = self.predata[ngramm][1] / summa #в 1 лежали количества вхождений слова
+            self.predata[ngramm][1] = self.predata[ngramm][1] / np.int(summa) #в 1 лежали количества вхождений слова
             # и мы их поделили на общую сумму вхождений слов. Получили список вероятностей
         
     
@@ -59,12 +59,12 @@ class Model:
         """
         return np.random.choice(self.predata[tuple(ngr)][0], p=self.predata[tuple(ngr)][1])
             
-    def getText(self, word, text_len):
+    def get_text(self, word, text_len):
         """
         По заданному слову генерирует последовательность заданной длины.
         :word: начальное слово.
         :text_len: длина последовательности.
-        :st: Необходимая последовательность
+        :string: Необходимая последовательность
         :cur_ngram: n-грамма, по которой ищем следующее слово.
         :return: последовательность заданной длины. 
         """
@@ -82,8 +82,11 @@ class Model:
             
         return string
     
-    def getRandomWord(self):
-        return str(random.choice([x for k in d for x in self.predata[k]]))
+    def get_random_word(self):
+        s = '_total_word_num'
+        while s == '_total_word_num':
+            s = str(random.choice(list(self.data[random.choice(list(self.data.keys()))].keys())))
+        return s
 
     
 if __name__ == "__main__":
@@ -99,15 +102,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     m.load(args.model)
+ 
 
     if args.seed:
-        word = m.getText(args.seed, args.length)
+        word = m.get_text(args.seed, args.length)
     else:
-        word = m.getText(m.getRandomWord, args.length)
+        word = m.get_text(m.get_random_word(), args.length)
 
     if args.output:
         with open(args.output, 'wb') as file:
             pickle.dump(word, file)
-            open("123", 'w').write(word) 
+            open("1234.txt", 'w').write(word) 
     else:
         print(word, args.length)
