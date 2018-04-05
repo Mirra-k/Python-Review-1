@@ -97,7 +97,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", help="path to the file from which the model is loaded")
     parser.add_argument("--seed", help="The initial word")
     parser.add_argument("--length", type=int, default=1 ,help="length of the generated sequence")
-    parser.add_argument("--output", help="The file to which the result will be written")
+    parser.add_argument("--output", default="output.txt" help="The file to which the result will be written")
 
     args = parser.parse_args()
 
