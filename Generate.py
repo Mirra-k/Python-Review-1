@@ -28,7 +28,8 @@ class Model:
             buffer = pickle.load(file1)
         self.data = {}
         for key in buffer.keys():
-            self.data[tuple(key.split(' '))] = buffer[key]
+            self.data[tuple(key.split(' '))] = buffer[key]  # слушай, а зачем ты сначала их в строку объединяешь, а потом здесь сплитишь?
+            # можно спокойно убрать
         self.n = len(list(self.data.keys())[:1])
       
     def _preprocess(self):
@@ -44,6 +45,10 @@ class Model:
         for ngramm, ngramm_value in self.data.items():
             self.predata[ngramm] = []
             self.predata[ngramm].append(list(ngramm_value.keys()))#добовляем список слов
+            
+            # вместо этих двух строчек, почему не сделать просто 
+            # self.predata[ngramm] = list(ngramm_value.keys())
+            
             summa = ngramm_value[self.__wnc]# запоминаем общую сумму для н-граммы
             ngramm_value[self.__wnc] = 0# обнуляем общую сумму, чтобы она не мешала рассчету вероятностей
             self.predata[ngramm].append(np.array(list(ngramm_value.values())))#добовляем список количества вхождений
@@ -85,9 +90,11 @@ class Model:
     def get_random_word(self):
         s = '_total_word_num'
         while s == '_total_word_num':
-            s = str(random.choice(list(self.data[random.choice(list(self.data.keys()))].keys())))
+            s = str(random.choice(list(self.data[random.choice(list(self.data.keys()))].keys())))  # ну что это за жесть 
         return s
 
+        # давай в несколько строчек
+        # и зачем цикл?
     
 if __name__ == "__main__":
     n = 1
@@ -112,6 +119,6 @@ if __name__ == "__main__":
     if args.output:
         with open(args.output, 'wb') as file:
             pickle.dump(word, file)
-            open("1234.txt", 'w').write(word) 
+            open("1234.txt", 'w').write(word)  # откуда 1234.txt?)
     else:
         print(word, args.length)
