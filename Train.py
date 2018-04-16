@@ -41,16 +41,13 @@ class Model:
                         cur_ngram.append(word.lower())
                     else:
                         cur_ngram.append(word)
-                        
-                    if len(cur_ngram) >= self.n: 
+                    if len(cur_ngram) > self.n: 
                         cur_ngram = cur_ngram[1:] # в предыдущей итерации мы внесли n-грамму в словарь.
                         #на этой мы создаем новую n-грамму из n-1 предыдущего слова и одного нового,
                         #добавленного выше
-                        
                         for i in range(self.n - 1):
                             key = tuple(cur_ngram[i:-1])
                             value = cur_ngram[-1]
-                            
                             if key not in self.data:
                                 self.data[key] = defaultdict(int)
                                 self.data[key][self.__wnc] = 0
@@ -65,27 +62,28 @@ class Model:
         """
         buffer = dict()
         for key in self.data.keys():
-            buffer[" ".join(list(key))] = self.data[key]
+            buffer[key] = self.data[key]
         with open(file_name, 'wb') as file:
             pickle.dump(buffer, file)
 
 if __name__ == "__main__":
-    n = 1
-    m = Model(n)
+    
+    
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", help="path to the directory containing the document collection")
-    parser.add_argument("--model", default="model.txt" help="the path to the file to which the model is saved")
+    parser.add_argument("--model", default="model.txt", help="the path to the file to which the model is saved")
     parser.add_argument("--lc", action='store_true', help="Allow the texts to lowercase")
-    
-    # а давай сделаем n параметром здесь и будем его брать отсюда
 
+    n = 1
+    m = Model(n)
+    
     args = parser.parse_args()
 
     if args.input_dir:
         files = os.listdir(args.input_dir) 
         for i in files:
-            m.fit_by_file(args.input_dir + '/' + i, args.lc)  # os.path.join, на винде это работать не будет
+            m.fit_by_file(args.input_dir + '/' + i, args.lc)
             m.to_file(args.model)
     else:
         file = open('file.stdin', 'w')
