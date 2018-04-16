@@ -112,6 +112,5 @@ if __name__ == "__main__":
     if args.output:
         with open(args.output, 'wb') as file:
             pickle.dump(word, file)
-            open("1234.txt", 'w').write(word) 
     else:
         print(word, args.length)
