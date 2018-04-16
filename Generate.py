@@ -28,8 +28,7 @@ class Model:
             buffer = pickle.load(file1)
         self.data = {}
         for key in buffer.keys():
-            self.data[tuple(key.split(' '))] = buffer[key]  # слушай, а зачем ты сначала их в строку объединяешь, а потом здесь сплитишь?
-            # можно спокойно убрать
+            self.data[tuple(key)] = buffer[key]
         self.n = len(list(self.data.keys())[:1])
       
     def _preprocess(self):
@@ -43,12 +42,7 @@ class Model:
         """
         self.predata = {}
         for ngramm, ngramm_value in self.data.items():
-            self.predata[ngramm] = []
-            self.predata[ngramm].append(list(ngramm_value.keys()))#добовляем список слов
-            
-            # вместо этих двух строчек, почему не сделать просто 
-            # self.predata[ngramm] = list(ngramm_value.keys())
-            
+            self.predata[ngramm] = [list(ngramm_value.keys())]#добовляем список слов
             summa = ngramm_value[self.__wnc]# запоминаем общую сумму для н-граммы
             ngramm_value[self.__wnc] = 0# обнуляем общую сумму, чтобы она не мешала рассчету вероятностей
             self.predata[ngramm].append(np.array(list(ngramm_value.values())))#добовляем список количества вхождений
@@ -90,11 +84,10 @@ class Model:
     def get_random_word(self):
         s = '_total_word_num'
         while s == '_total_word_num':
-            s = str(random.choice(list(self.data[random.choice(list(self.data.keys()))].keys())))  # ну что это за жесть 
+            randomKey = random.choice(list(self.data.keys()))
+            s = str(random.choice(list(self.data[randomKey].keys())))
         return s
 
-        # давай в несколько строчек
-        # и зачем цикл?
     
 if __name__ == "__main__":
     n = 1
@@ -104,7 +97,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", help="path to the file from which the model is loaded")
     parser.add_argument("--seed", help="The initial word")
     parser.add_argument("--length", type=int, default=1 ,help="length of the generated sequence")
-    parser.add_argument("--output", default="output.txt" help="The file to which the result will be written")
+    parser.add_argument("--output", default="output.txt", help="The file to which the result will be written")
 
     args = parser.parse_args()
 
@@ -119,6 +112,6 @@ if __name__ == "__main__":
     if args.output:
         with open(args.output, 'wb') as file:
             pickle.dump(word, file)
-            open("1234.txt", 'w').write(word)  # откуда 1234.txt?)
+            open("1234.txt", 'w').write(word) 
     else:
         print(word, args.length)
